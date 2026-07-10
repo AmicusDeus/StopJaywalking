@@ -2,7 +2,7 @@
 	<!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
 	<ModId Value="150664" />
 	<!--Name of the mod to display to players-->
-	<DisplayName Value="ZebraCrossings" />
+	<DisplayName Value="StopJaywalking" />
 	<!--Short description of the mod-->
 	<ShortDescription Value="Make jaywalking expensive so pedestrians funnel to marked zebra crossings instead of cutting across roads anywhere." />
 	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
@@ -18,6 +18,10 @@ Options:
 - Re-apply interval (in-game hours) — the game can reset the cost after big road edits, so the mod periodically re-asserts it.
 
 Everything is opt-in; turn the mod off for exact vanilla behaviour.
+
+Source (open source, MIT): https://github.com/AmicusDeus/StopJaywalking
+
+Made with Claude Code, Anthropic's agentic coding tool.
 	</LongDescription>
 	<!--Thumbnail-->
 	<Thumbnail Value="Properties/Thumbnail.png" />
@@ -38,7 +42,7 @@ Everything is opt-in; turn the mod off for exact vanilla behaviour.
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
 	<ChangeLog Value="Initial public release." />
 	<!--External link, can be set multiple times. supported types are "discord", "github", "youtube", "twitch", "x", "paypal", "patreon", "buymeacoffee", "kofi", "crowdin", "gitlab", "gofundme"-->
-	<ExternalLink Type="" Url="" />
+	<ExternalLink Type="github" Url="https://github.com/AmicusDeus/StopJaywalking" />
 	<!--Supported values Public, Private, Unlisted-->
 	<AccessLevel Value="Public" />
 </Publish>

@@ -8,7 +8,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
-namespace ZebraCrossings
+namespace StopJaywalking
 {
     // Funnels pedestrians to marked zebra crossings by making jaywalking expensive.
     //
@@ -24,7 +24,7 @@ namespace ZebraCrossings
     // each session, so first sight == vanilla) and always set target = original * multiplier — re-asserting never
     // compounds. Disabled or multiplier 1 => restore vanilla. Re-asserted on the user interval because a road regen /
     // prefab reload can restore the vanilla cost.
-    public partial class ZebraCrossingSystem : GameSystemBase
+    public partial class StopJaywalkingSystem : GameSystemBase
     {
         // 1 in-game day = 262144 sim frames = 24 in-game hours.
         private const int kFramesPerGameHour = 262144 / 24; // ~10922
@@ -117,7 +117,7 @@ namespace ZebraCrossings
                 else zebra++;
             }
             lanes.Dispose();
-            Mod.log.Info($"[SelfTest] zebraCrossings: enabled={s.Enabled} multiplier={mult}x intervalHrs={s.ReassertIntervalHours} costPrefabs={m_OrigUnsafe.Count} markedZebras={zebra} jaywalkCrossings={jaywalk} sidewalks+paths={nonCrossing}");
+            Mod.log.Info($"[SelfTest] stopJaywalking: enabled={s.Enabled} multiplier={mult}x intervalHrs={s.ReassertIntervalHours} costPrefabs={m_OrigUnsafe.Count} markedZebras={zebra} jaywalkCrossings={jaywalk} sidewalks+paths={nonCrossing}");
         }
     }
 }

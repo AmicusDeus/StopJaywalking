@@ -2,9 +2,9 @@ using Colossal.IO.AssetDatabase;
 using Game.Modding;
 using Game.Settings;
 
-namespace ZebraCrossings
+namespace StopJaywalking
 {
-    [FileLocation(nameof(ZebraCrossings))]
+    [FileLocation(nameof(StopJaywalking))]
     public class Setting : ModSetting
     {
         public const string Section = "Main";

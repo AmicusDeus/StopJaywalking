@@ -7,11 +7,11 @@ using Game.Modding;
 using Game.SceneFlow;
 using Game.Simulation;
 
-namespace ZebraCrossings
+namespace StopJaywalking
 {
     public class Mod : IMod
     {
-        public static ILog log = LogManager.GetLogger($"{nameof(ZebraCrossings)}.{nameof(Mod)}").SetShowsErrorsInUI(false);
+        public static ILog log = LogManager.GetLogger($"{nameof(StopJaywalking)}.{nameof(Mod)}").SetShowsErrorsInUI(false);
         public static Setting ActiveSetting;
 
         public void OnLoad(UpdateSystem updateSystem)
@@ -21,11 +21,11 @@ namespace ZebraCrossings
             ActiveSetting = new Setting(this);
             ActiveSetting.RegisterInOptionsUI();
             GameManager.instance.localizationManager.AddSource("en-US", new LocaleEn(ActiveSetting));
-            AssetDatabase.global.LoadSettings(nameof(ZebraCrossings), ActiveSetting, new Setting(this));
+            AssetDatabase.global.LoadSettings(nameof(StopJaywalking), ActiveSetting, new Setting(this));
 
-            updateSystem.UpdateAt<ZebraCrossingSystem>(SystemUpdatePhase.GameSimulation);
+            updateSystem.UpdateAt<StopJaywalkingSystem>(SystemUpdatePhase.GameSimulation);
 
-            log.Info("[SelfTest] ZebraCrossings loaded (jaywalk-cost deterrent).");
+            log.Info("[SelfTest] StopJaywalking loaded (jaywalk-cost deterrent).");
         }
 
         public void OnDispose()
@@ -49,10 +49,10 @@ namespace ZebraCrossings
         {
             return new Dictionary<string, string>
             {
-                { m_S.GetSettingsLocaleID(), "Zebra Crossings" },
+                { m_S.GetSettingsLocaleID(), "Stop Jaywalking" },
                 { m_S.GetOptionTabLocaleID(Setting.Section), "Main" },
                 { m_S.GetOptionGroupLocaleID(Setting.Group), "Pedestrian crossings" },
-                { m_S.GetOptionLabelLocaleID(nameof(Setting.Enabled)), "Enable Zebra Crossings" },
+                { m_S.GetOptionLabelLocaleID(nameof(Setting.Enabled)), "Enable Stop Jaywalking" },
                 { m_S.GetOptionDescLocaleID(nameof(Setting.Enabled)), "Makes jaywalking (crossing a road away from a marked crosswalk) expensive so pedestrians funnel to zebra crossings. Off = vanilla behaviour." },
                 { m_S.GetOptionLabelLocaleID(nameof(Setting.CostMultiplier)), "Jaywalk cost multiplier" },
                 { m_S.GetOptionDescLocaleID(nameof(Setting.CostMultiplier)), "How much more costly an unmarked crossing is versus vanilla. Higher = pedestrians avoid jaywalking harder and detour to marked crossings. No one is ever fully stranded — if no crossing is reachable they still cross, just reluctantly." },
