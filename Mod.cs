@@ -1,0 +1,66 @@
+using System.Collections.Generic;
+using Colossal;
+using Colossal.IO.AssetDatabase;
+using Colossal.Logging;
+using Game;
+using Game.Modding;
+using Game.SceneFlow;
+using Game.Simulation;
+
+namespace ZebraCrossings
+{
+    public class Mod : IMod
+    {
+        public static ILog log = LogManager.GetLogger($"{nameof(ZebraCrossings)}.{nameof(Mod)}").SetShowsErrorsInUI(false);
+        public static Setting ActiveSetting;
+
+        public void OnLoad(UpdateSystem updateSystem)
+        {
+            log.Info(nameof(OnLoad));
+
+            ActiveSetting = new Setting(this);
+            ActiveSetting.RegisterInOptionsUI();
+            GameManager.instance.localizationManager.AddSource("en-US", new LocaleEn(ActiveSetting));
+            AssetDatabase.global.LoadSettings(nameof(ZebraCrossings), ActiveSetting, new Setting(this));
+
+            updateSystem.UpdateAt<ZebraCrossingSystem>(SystemUpdatePhase.GameSimulation);
+
+            log.Info("[SelfTest] ZebraCrossings loaded (jaywalk-cost deterrent).");
+        }
+
+        public void OnDispose()
+        {
+            log.Info(nameof(OnDispose));
+            if (ActiveSetting != null)
+            {
+                ActiveSetting.UnregisterInOptionsUI();
+                ActiveSetting = null;
+            }
+        }
+    }
+
+    // Minimal English locale (same pipeline as the other mods).
+    public class LocaleEn : IDictionarySource
+    {
+        private readonly Setting m_S;
+        public LocaleEn(Setting setting) { m_S = setting; }
+
+        public IEnumerable<KeyValuePair<string, string>> ReadEntries(IList<IDictionaryEntryError> errors, Dictionary<string, int> indexCounts)
+        {
+            return new Dictionary<string, string>
+            {
+                { m_S.GetSettingsLocaleID(), "Zebra Crossings" },
+                { m_S.GetOptionTabLocaleID(Setting.Section), "Main" },
+                { m_S.GetOptionGroupLocaleID(Setting.Group), "Pedestrian crossings" },
+                { m_S.GetOptionLabelLocaleID(nameof(Setting.Enabled)), "Enable Zebra Crossings" },
+                { m_S.GetOptionDescLocaleID(nameof(Setting.Enabled)), "Makes jaywalking (crossing a road away from a marked crosswalk) expensive so pedestrians funnel to zebra crossings. Off = vanilla behaviour." },
+                { m_S.GetOptionLabelLocaleID(nameof(Setting.CostMultiplier)), "Jaywalk cost multiplier" },
+                { m_S.GetOptionDescLocaleID(nameof(Setting.CostMultiplier)), "How much more costly an unmarked crossing is versus vanilla. Higher = pedestrians avoid jaywalking harder and detour to marked crossings. No one is ever fully stranded — if no crossing is reachable they still cross, just reluctantly." },
+                { m_S.GetOptionLabelLocaleID(nameof(Setting.ReassertIntervalHours)), "Re-apply interval (in-game hours)" },
+                { m_S.GetOptionDescLocaleID(nameof(Setting.ReassertIntervalHours)), "How often the mod re-applies the cost. The game can reset it after big road edits; a shorter interval re-applies sooner." },
+            };
+        }
+
+        public void Unload() { }
+    }
+}
