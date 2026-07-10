@@ -40,7 +40,7 @@ Made with Claude Code, Anthropic's agentic coding tool.
 	<!--Required DLC, can be set multiple times. Supported values are "Landmark Buildings", "San Fransisco Set", "Beach Properties", "Urban Promenades", "Modern Architecture"-->
 	<RequiredDLC Value="" />
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
-	<ChangeLog Value="Initial public release." />
+	<ChangeLog Value="Now open-source (GitHub link added) with a 'Made with Claude Code' note; renamed from ZebraCrossings." />
 	<!--External link, can be set multiple times. supported types are "discord", "github", "youtube", "twitch", "x", "paypal", "patreon", "buymeacoffee", "kofi", "crowdin", "gitlab", "gofundme"-->
 	<ExternalLink Type="github" Url="https://github.com/AmicusDeus/StopJaywalking" />
 	<!--Supported values Public, Private, Unlisted-->
