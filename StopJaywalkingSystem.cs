@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Colossal.Serialization.Entities;
 using Game;
 using Game.Common;
 using Game.Net;
@@ -51,6 +52,19 @@ namespace StopJaywalking
                 All = new[] { ComponentType.ReadOnly<Game.Net.PedestrianLane>() },
                 None = new[] { ComponentType.ReadOnly<Deleted>(), ComponentType.ReadOnly<Game.Tools.Temp>() },
             });
+        }
+
+        // Loading a save (or otherwise finishing a load) reloads the pedestrian PathfindPrefab data back to its
+        // vanilla unsafe-crosswalk cost — but the multiplier itself hasn't changed, so OnUpdate wouldn't re-assert
+        // until the next interval, leaving jaywalking at vanilla cost until then. Force an immediate re-apply on the
+        // next tick. Cache is kept intentionally: the prefab entity is the same across a load and its cached original
+        // is already vanilla, and ApplyUnsafeCost SETS target = original*mult (never compounds), so this can't
+        // double-apply.
+        protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode)
+        {
+            base.OnGameLoadingComplete(purpose, mode);
+            m_AppliedMult = -1f; // != any real multiplier => OnUpdate re-applies immediately
+            m_LastReassert = 0u;
         }
 
         // Coarse cadence; the actual re-assert + census are gated on their own frame counters below.
