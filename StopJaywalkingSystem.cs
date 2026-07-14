@@ -38,6 +38,10 @@ namespace StopJaywalking
         private uint m_LastLog;
         private float m_AppliedMult = -1f; // last multiplier we wrote (so a setting change re-applies immediately)
 
+        // Set while the system is alive so the settings-change hook (Mod.OnSettingsApplied) can push the cost the
+        // instant a slider moves. Null before the world exists (e.g. main menu) — the hook then simply no-ops.
+        public static StopJaywalkingSystem Instance { get; private set; }
+
         protected override void OnCreate()
         {
             base.OnCreate();
@@ -52,6 +56,14 @@ namespace StopJaywalking
                 All = new[] { ComponentType.ReadOnly<Game.Net.PedestrianLane>() },
                 None = new[] { ComponentType.ReadOnly<Deleted>(), ComponentType.ReadOnly<Game.Tools.Temp>() },
             });
+            Instance = this;
+        }
+
+        protected override void OnDestroy()
+        {
+            if (Instance == this)
+                Instance = null;
+            base.OnDestroy();
         }
 
         // Loading a save (or otherwise finishing a load) reloads the pedestrian PathfindPrefab data back to its
@@ -93,6 +105,28 @@ namespace StopJaywalking
             {
                 m_LastLog = frame;
                 LogCensus(s, mult);
+            }
+        }
+
+        // Apply the current cost RIGHT NOW on the main thread — called the instant the user changes any setting (via
+        // Mod's onSettingsApplied hook) so the effect is immediate instead of waiting up to one OnUpdate tick
+        // (GetUpdateInterval = 2048 frames). OnUpdate then keeps re-asserting on the user interval as before. Guarded: a
+        // no-op if there's no world / no pedestrian prefab yet (main menu), and it never throws back into the settings UI.
+        public void ApplyNow()
+        {
+            Setting s = Mod.ActiveSetting;
+            if (s == null)
+                return;
+            try
+            {
+                float mult = s.Enabled ? math.max(1f, s.CostMultiplier) : 1f;
+                ApplyUnsafeCost(mult);
+                m_AppliedMult = mult;
+                m_LastReassert = m_Sim != null ? m_Sim.frameIndex : 0u;
+            }
+            catch (System.Exception ex)
+            {
+                Mod.log.Warn($"[StopJaywalking] immediate apply skipped: {ex.Message}");
             }
         }
 

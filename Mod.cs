@@ -22,10 +22,19 @@ namespace StopJaywalking
             ActiveSetting.RegisterInOptionsUI();
             GameManager.instance.localizationManager.AddSource("en-US", new LocaleEn(ActiveSetting));
             AssetDatabase.global.LoadSettings(nameof(StopJaywalking), ActiveSetting, new Setting(this));
+            // Apply the cost the instant the user changes a setting (immediate feedback), on top of the interval re-assert.
+            ActiveSetting.onSettingsApplied += OnSettingsApplied;
 
             updateSystem.UpdateAt<StopJaywalkingSystem>(SystemUpdatePhase.GameSimulation);
 
             log.Info("[SelfTest] StopJaywalking loaded (jaywalk-cost deterrent).");
+        }
+
+        // Fires the instant the user changes any Stop Jaywalking setting (ApplyAndSave -> onSettingsApplied): push the
+        // new cost immediately so the change is visible right away; the system's interval re-assert then continues.
+        private static void OnSettingsApplied(Game.Settings.Setting setting)
+        {
+            StopJaywalkingSystem.Instance?.ApplyNow();
         }
 
         public void OnDispose()
@@ -33,6 +42,7 @@ namespace StopJaywalking
             log.Info(nameof(OnDispose));
             if (ActiveSetting != null)
             {
+                ActiveSetting.onSettingsApplied -= OnSettingsApplied;
                 ActiveSetting.UnregisterInOptionsUI();
                 ActiveSetting = null;
             }
