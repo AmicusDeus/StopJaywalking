@@ -32,11 +32,21 @@ namespace StopJaywalking
             log.Info("[SelfTest] StopJaywalking loaded (jaywalk-cost deterrent).");
         }
 
-        // Fires the instant the user changes any Stop Jaywalking setting (ApplyAndSave -> onSettingsApplied): push the
-        // new cost immediately so the change is visible right away; the system's interval re-assert then continues.
+        // Fires the instant the user changes any Stop Jaywalking setting: push the new cost immediately so the change is
+        // visible right away, AND write it straight to disk so a crash / non-clean exit can't lose it. Guarded because
+        // ApplyAndSave re-raises onSettingsApplied.
+        private static bool s_savingReentrant;
         private static void OnSettingsApplied(Game.Settings.Setting setting)
         {
-            StopJaywalkingSystem.Instance?.ApplyNow();
+            if (s_savingReentrant)
+                return;
+            s_savingReentrant = true;
+            try
+            {
+                StopJaywalkingSystem.Instance?.ApplyNow();
+                ActiveSetting?.ApplyAndSave();
+            }
+            finally { s_savingReentrant = false; }
         }
 
         public void OnDispose()
