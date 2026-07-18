@@ -26,6 +26,8 @@ namespace StopJaywalking
             ActiveSetting.onSettingsApplied += OnSettingsApplied;
 
             updateSystem.UpdateAt<StopJaywalkingSystem>(SystemUpdatePhase.GameSimulation);
+            // Keep platform achievements enabled while the mod is active.
+            updateSystem.UpdateAt<AchievementEnablerSystem>(SystemUpdatePhase.GameSimulation);
 
             log.Info("[SelfTest] StopJaywalking loaded (jaywalk-cost deterrent).");
         }
@@ -68,6 +70,10 @@ namespace StopJaywalking
                 { m_S.GetOptionDescLocaleID(nameof(Setting.CostMultiplier)), "How much more costly an unmarked crossing is versus vanilla. Higher = pedestrians avoid jaywalking harder and detour to marked crossings. No one is ever fully stranded — if no crossing is reachable they still cross, just reluctantly." },
                 { m_S.GetOptionLabelLocaleID(nameof(Setting.ReassertIntervalHours)), "Re-apply interval (in-game hours)" },
                 { m_S.GetOptionDescLocaleID(nameof(Setting.ReassertIntervalHours)), "How often the mod re-applies the cost. The game can reset it after big road edits; a shorter interval re-applies sooner." },
+
+                { m_S.GetOptionGroupLocaleID(Setting.GroupGeneral), "General" },
+                { m_S.GetOptionLabelLocaleID(nameof(Setting.EnableAchievements)), "Keep achievements enabled" },
+                { m_S.GetOptionDescLocaleID(nameof(Setting.EnableAchievements)), "Cities: Skylines II disables achievements whenever any mod is active. This re-enables them. Safe to leave on." },
             };
         }
 

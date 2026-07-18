@@ -9,6 +9,7 @@ namespace StopJaywalking
     {
         public const string Section = "Main";
         public const string Group = "Crossings";
+        public const string GroupGeneral = "General";
 
         public Setting(IMod mod) : base(mod) { }
 
@@ -31,11 +32,16 @@ namespace StopJaywalking
         [SettingsUISection(Section, Group)]
         public int ReassertIntervalHours { get; set; } = 1;
 
+        // Keep platform achievements enabled while this mod is active (the game otherwise disables them for any mod).
+        [SettingsUISection(Section, GroupGeneral)]
+        public bool EnableAchievements { get; set; } = true;
+
         public override void SetDefaults()
         {
             Enabled = true;
             CostMultiplier = 10f;
             ReassertIntervalHours = 1;
+            EnableAchievements = true;
         }
     }
 }
