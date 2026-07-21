@@ -2,7 +2,7 @@
 
 Makes jaywalking expensive so pedestrians funnel to marked zebra crossings instead of cutting across roads anywhere, in **Cities: Skylines II**.
 
-**Paradox Mods:** https://mods.paradoxplaza.com/mods/150664
+**Paradox Mods:** https://mods.paradoxplaza.com/mods/150664/Windows
 
 ## What it does
 The game already treats an unmarked crossing as "unsafe" (a mild pathfind penalty vs a real crosswalk), but it's a nudge, not a deterrent — so cims still jaywalk. This mod multiplies that unsafe-crossing cost by a factor you choose, turning the nudge into a real deterrent. Marked zebra crossings are left untouched and stay cheap, so pedestrians funnel to them.
