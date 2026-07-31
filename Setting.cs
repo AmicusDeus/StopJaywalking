@@ -4,14 +4,18 @@ using Game.Settings;
 
 namespace StopJaywalking
 {
+    // NOTE: the CLASS NAME must stay unique across all of this author's mods. Setting.ApplyAndSave() resolves the
+    // target settings file by GetType().Name and takes the FIRST match, so two mods sharing a simple name silently
+    // write into each other's file. The [FileLocation] value and the LoadSettings(...) name below are the on-disk
+    // identity (the .coc filename / top-level key) and must NOT change — only the C# identifier is unique-ified.
     [FileLocation(nameof(StopJaywalking))]
-    public class Setting : ModSetting
+    public class StopJaywalkingSetting : ModSetting
     {
         public const string Section = "Main";
         public const string Group = "Crossings";
         public const string GroupGeneral = "General";
 
-        public Setting(IMod mod) : base(mod) { }
+        public StopJaywalkingSetting(IMod mod) : base(mod) { }
 
         // NOTE: property initializers double as the settings-migration failsafe — a key missing from an old settings
         // file keeps these values instead of defaulting to 0/false.
@@ -32,16 +36,11 @@ namespace StopJaywalking
         [SettingsUISection(Section, Group)]
         public int ReassertIntervalHours { get; set; } = 1;
 
-        // Keep platform achievements enabled while this mod is active (the game otherwise disables them for any mod).
-        [SettingsUISection(Section, GroupGeneral)]
-        public bool EnableAchievements { get; set; } = true;
-
         public override void SetDefaults()
         {
             Enabled = true;
             CostMultiplier = 10f;
             ReassertIntervalHours = 1;
-            EnableAchievements = true;
         }
     }
 }

@@ -84,7 +84,7 @@ namespace StopJaywalking
 
         protected override void OnUpdate()
         {
-            Setting s = Mod.ActiveSetting;
+            StopJaywalkingSetting s = Mod.ActiveSetting;
             if (s == null)
                 return;
 
@@ -114,7 +114,7 @@ namespace StopJaywalking
         // no-op if there's no world / no pedestrian prefab yet (main menu), and it never throws back into the settings UI.
         public void ApplyNow()
         {
-            Setting s = Mod.ActiveSetting;
+            StopJaywalkingSetting s = Mod.ActiveSetting;
             if (s == null)
                 return;
             try
@@ -153,7 +153,7 @@ namespace StopJaywalking
             ents.Dispose();
         }
 
-        private void LogCensus(Setting s, float mult)
+        private void LogCensus(StopJaywalkingSetting s, float mult)
         {
             NativeArray<Game.Net.PedestrianLane> lanes = m_LaneQuery.ToComponentDataArray<Game.Net.PedestrianLane>(Allocator.Temp);
             int zebra = 0, jaywalk = 0, nonCrossing = 0;

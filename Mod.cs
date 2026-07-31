@@ -12,41 +12,34 @@ namespace StopJaywalking
     public class Mod : IMod
     {
         public static ILog log = LogManager.GetLogger($"{nameof(StopJaywalking)}.{nameof(Mod)}").SetShowsErrorsInUI(false);
-        public static Setting ActiveSetting;
+        public static StopJaywalkingSetting ActiveSetting;
 
         public void OnLoad(UpdateSystem updateSystem)
         {
             log.Info(nameof(OnLoad));
 
-            ActiveSetting = new Setting(this);
+            ActiveSetting = new StopJaywalkingSetting(this);
             ActiveSetting.RegisterInOptionsUI();
-            GameManager.instance.localizationManager.AddSource("en-US", new LocaleEn(ActiveSetting));
-            AssetDatabase.global.LoadSettings(nameof(StopJaywalking), ActiveSetting, new Setting(this));
+            var lm = GameManager.instance.localizationManager;
+            foreach (var locale in lm.GetSupportedLocales())
+                lm.AddSource(locale, new LocaleEn(ActiveSetting, locale));
+            AssetDatabase.global.LoadSettings(nameof(StopJaywalking), ActiveSetting, new StopJaywalkingSetting(this));
             // Apply the cost the instant the user changes a setting (immediate feedback), on top of the interval re-assert.
             ActiveSetting.onSettingsApplied += OnSettingsApplied;
 
             updateSystem.UpdateAt<StopJaywalkingSystem>(SystemUpdatePhase.GameSimulation);
-            // Keep platform achievements enabled while the mod is active.
-            updateSystem.UpdateAt<AchievementEnablerSystem>(SystemUpdatePhase.GameSimulation);
 
             log.Info("[SelfTest] StopJaywalking loaded (jaywalk-cost deterrent).");
         }
 
-        // Fires the instant the user changes any Stop Jaywalking setting: push the new cost immediately so the change is
-        // visible right away, AND write it straight to disk so a crash / non-clean exit can't lose it. Guarded because
-        // ApplyAndSave re-raises onSettingsApplied.
-        private static bool s_savingReentrant;
+        // Fires the instant the user changes any Stop Jaywalking setting: push the new cost immediately so the change
+        // is visible right away instead of waiting for the next interval re-assert.
+        // NOTE: this handler deliberately does NOT persist — vanilla AutomaticSettings already calls ApplyAndSave() on
+        // every options-widget change, so saving here only doubled traffic into a task queue that silently drops work
+        // when over its cap of 2.
         private static void OnSettingsApplied(Game.Settings.Setting setting)
         {
-            if (s_savingReentrant)
-                return;
-            s_savingReentrant = true;
-            try
-            {
-                StopJaywalkingSystem.Instance?.ApplyNow();
-                ActiveSetting?.ApplyAndSave();
-            }
-            finally { s_savingReentrant = false; }
+            StopJaywalkingSystem.Instance?.ApplyNow();
         }
 
         public void OnDispose()
@@ -64,26 +57,26 @@ namespace StopJaywalking
     // Minimal English locale (same pipeline as the other mods).
     public class LocaleEn : IDictionarySource
     {
-        private readonly Setting m_S;
-        public LocaleEn(Setting setting) { m_S = setting; }
+        private readonly StopJaywalkingSetting m_S;
+        private readonly string m_L;
+        public LocaleEn(StopJaywalkingSetting setting, string locale) { m_S = setting; m_L = locale; }
+        private string T(string k) => Translations.Get(k, m_L);
 
         public IEnumerable<KeyValuePair<string, string>> ReadEntries(IList<IDictionaryEntryError> errors, Dictionary<string, int> indexCounts)
         {
             return new Dictionary<string, string>
             {
                 { m_S.GetSettingsLocaleID(), "Stop Jaywalking" },
-                { m_S.GetOptionTabLocaleID(Setting.Section), "Main" },
-                { m_S.GetOptionGroupLocaleID(Setting.Group), "Pedestrian crossings" },
-                { m_S.GetOptionLabelLocaleID(nameof(Setting.Enabled)), "Enable Stop Jaywalking" },
-                { m_S.GetOptionDescLocaleID(nameof(Setting.Enabled)), "Makes jaywalking (crossing a road away from a marked crosswalk) expensive so pedestrians funnel to zebra crossings. Off = vanilla behaviour." },
-                { m_S.GetOptionLabelLocaleID(nameof(Setting.CostMultiplier)), "Jaywalk cost multiplier" },
-                { m_S.GetOptionDescLocaleID(nameof(Setting.CostMultiplier)), "How much more costly an unmarked crossing is versus vanilla. Higher = pedestrians avoid jaywalking harder and detour to marked crossings. No one is ever fully stranded — if no crossing is reachable they still cross, just reluctantly." },
-                { m_S.GetOptionLabelLocaleID(nameof(Setting.ReassertIntervalHours)), "Re-apply interval (in-game hours)" },
-                { m_S.GetOptionDescLocaleID(nameof(Setting.ReassertIntervalHours)), "How often the mod re-applies the cost. The game can reset it after big road edits; a shorter interval re-applies sooner." },
+                { m_S.GetOptionTabLocaleID(StopJaywalkingSetting.Section), "Main" },
+                { m_S.GetOptionGroupLocaleID(StopJaywalkingSetting.Group), T("grp.Group") },
+                { m_S.GetOptionLabelLocaleID(nameof(StopJaywalkingSetting.Enabled)), T("opt.Enabled.L") },
+                { m_S.GetOptionDescLocaleID(nameof(StopJaywalkingSetting.Enabled)), T("opt.Enabled.D") },
+                { m_S.GetOptionLabelLocaleID(nameof(StopJaywalkingSetting.CostMultiplier)), T("opt.CostMultiplier.L") },
+                { m_S.GetOptionDescLocaleID(nameof(StopJaywalkingSetting.CostMultiplier)), T("opt.CostMultiplier.D") },
+                { m_S.GetOptionLabelLocaleID(nameof(StopJaywalkingSetting.ReassertIntervalHours)), T("opt.ReassertIntervalHours.L") },
+                { m_S.GetOptionDescLocaleID(nameof(StopJaywalkingSetting.ReassertIntervalHours)), T("opt.ReassertIntervalHours.D") },
 
-                { m_S.GetOptionGroupLocaleID(Setting.GroupGeneral), "General" },
-                { m_S.GetOptionLabelLocaleID(nameof(Setting.EnableAchievements)), "Keep achievements enabled" },
-                { m_S.GetOptionDescLocaleID(nameof(Setting.EnableAchievements)), "Cities: Skylines II disables achievements whenever any mod is active. This re-enables them. Safe to leave on." },
+                { m_S.GetOptionGroupLocaleID(StopJaywalkingSetting.GroupGeneral), T("grp.GroupGeneral") },
             };
         }
 
